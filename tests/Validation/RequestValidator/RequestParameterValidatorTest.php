@@ -91,6 +91,29 @@ class RequestParameterValidatorTest extends TestCase
         );
     }
 
+    public function testCanValidateOptionalRequestParameterWithoutRequiredFlag(): void
+    {
+        $request = new Request();
+        $request->attributes->set(
+            RouteContext::REQUEST_ATTRIBUTE,
+            [
+                RouteContext::REQUEST_VALIDATE_QUERY_PARAMETERS => [
+                    'foo' => json_encode([
+                        'name' => 'foo',
+                        'in' => 'query',
+                        'schema' => [
+                            'type' => 'string',
+                        ],
+                    ]),
+                ],
+            ]
+        );
+
+        static::assertNull(
+            $this->validator->validate($request)
+        );
+    }
+
     public function testCanValidateRequestParameterOfTypeBoolean(): void
     {
         $request = new Request();
