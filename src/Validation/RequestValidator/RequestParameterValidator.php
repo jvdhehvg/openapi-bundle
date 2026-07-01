@@ -92,7 +92,10 @@ final class RequestParameterValidator implements ValidatorInterface
             return $violations;
         }
 
-        $parameterValue = $request->query->get($parameterName);
+        $parameterValue = $this->normalizeQueryParameterValue(
+            $request->query->get($parameterName),
+            $parameter->schema
+        );
 
         $this->jsonValidator->validate($parameterValue, $parameter->schema, Constraint::CHECK_MODE_COERCE_TYPES);
         if ($this->jsonValidator->isValid()) {
@@ -110,5 +113,24 @@ final class RequestParameterValidator implements ValidatorInterface
             },
             $validationErrors
         );
+    }
+
+    /**
+     * Normalizes query parameter values that Symfony exposes as strings.
+     *
+     * Boolean query parameters are commonly passed as `1`/`0` in URLs, but
+     * JsonSchema expects native booleans for a boolean schema.
+     */
+    private function normalizeQueryParameterValue(mixed $parameterValue, stdClass $schema): mixed
+    {
+        if (($schema->type ?? null) !== 'boolean' || is_string($parameterValue) === false) {
+            return $parameterValue;
+        }
+
+        return match (strtolower($parameterValue)) {
+            '1', 'true' => true,
+            '0', 'false' => false,
+            default => $parameterValue,
+        };
     }
 }

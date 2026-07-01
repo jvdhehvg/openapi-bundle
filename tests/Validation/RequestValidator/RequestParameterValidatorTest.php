@@ -139,6 +139,31 @@ class RequestParameterValidatorTest extends TestCase
         );
     }
 
+    public function testCanValidateRequestParameterOfTypeBooleanWithOne(): void
+    {
+        $request = new Request();
+        $request->query->set('foo', '1');
+        $request->attributes->set(
+            RouteContext::REQUEST_ATTRIBUTE,
+            [
+                RouteContext::REQUEST_VALIDATE_QUERY_PARAMETERS => [
+                    'foo' => json_encode([
+                        'name' => 'foo',
+                        'in' => 'query',
+                        'required' => true,
+                        'schema' => [
+                            'type' => 'boolean',
+                        ],
+                    ]),
+                ],
+            ]
+        );
+
+        static::assertNull(
+            $this->validator->validate($request)
+        );
+    }
+
     public function testCanValidateRequestParameterOfTypeString(): void
     {
         $request = new Request();
