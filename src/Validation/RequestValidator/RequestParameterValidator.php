@@ -92,10 +92,10 @@ final class RequestParameterValidator implements ValidatorInterface
             return $violations;
         }
 
-        $parameterValue = $this->normalizeQueryParameterValue(
-            $request->query->get($parameterName),
-            $parameter->schema
-        );
+        $parameterValue = $request->query->get($parameterName);
+        if ($schema->type === 'boolean') {
+          $parameterValue = $request->query->getBoolean($parameterName, $schema->default ?? false);
+        }
 
         $this->jsonValidator->validate($parameterValue, $parameter->schema, Constraint::CHECK_MODE_COERCE_TYPES);
         if ($this->jsonValidator->isValid()) {
